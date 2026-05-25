@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DOCTORS, TODAY, colors } from "./constants";
+import { DOCTORS, TODAY } from "./constants";
 import { s } from "./styles";
 import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
@@ -8,13 +8,22 @@ import PatientRecords from "./pages/PatientRecords";
 import DoctorSchedules from "./pages/DoctorSchedules";
 import ReschedulePage from "./pages/ReschedulePage";
 
-export default function ClinicSync() {
-  const [role, setRole] = useState(null); // null | "patient" | "staff"
-  const [view, setView] = useState("login"); // login | dashboard | book | records | schedule | reschedule
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
+const DEFAULT_USERS = [
+  { username: "staff", password: "1234", role: "staff" },
+  { username: "patient", password: "1234", role: "patient" },
+];
 
+export default function ClinicSync() {
+  // Auth
+  const [users, setUsers] = useState(DEFAULT_USERS);
+  const [role, setRole] = useState(null);
+  const [loginError, setLoginError] = useState("");
+  const [registerError, setRegisterError] = useState("");
+
+  // Navigation
+  const [view, setView] = useState("login");
+
+  // Booking
   const [bookings, setBookings] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [selectedDate, setSelectedDate] = useState(TODAY);
@@ -22,34 +31,60 @@ export default function ClinicSync() {
   const [patientName, setPatientName] = useState("");
   const [bookMsg, setBookMsg] = useState("");
 
+  // Reschedule
   const [rescheduleTarget, setRescheduleTarget] = useState(null);
   const [rescheduleSlot, setRescheduleSlot] = useState(null);
 
+  // Patient records
   const [patients, setPatients] = useState([
     { id: 1, name: "Juan dela Cruz", age: 34, contact: "09171234567", notes: "Hypertension" },
     { id: 2, name: "Maria Garcia", age: 28, contact: "09281234567", notes: "Asthma" },
   ]);
   const [editPatient, setEditPatient] = useState(null);
 
+  // Schedules
   const [blockedDates, setBlockedDates] = useState({});
   const [blockDate, setBlockDate] = useState(TODAY);
   const [blockDoctor, setBlockDoctor] = useState(DOCTORS[0].id);
 
-  // --- Helpers ---
+  // --- Auth handlers ---
 
-  function handleLogin() {
-    if (username === "staff" && password === "1234") {
-      setRole("staff"); setView("dashboard"); setLoginError("");
-    } else if (username === "patient" && password === "1234") {
-      setRole("patient"); setView("dashboard"); setLoginError("");
+  function handleLogin(username, password) {
+    const user = users.find(u => u.username === username && u.password === password);
+    if (user) {
+      setRole(user.role);
+      setView("dashboard");
+      setLoginError("");
     } else {
-      setLoginError("Invalid credentials.");
+      setLoginError("Invalid credentials. Try staff/1234 or patient/1234");
     }
   }
 
-  function handleLogout() {
-    setRole(null); setView("login"); setUsername(""); setPassword(""); setLoginError("");
+  function handleRegister(username, password, confirmPassword, role) {
+    if (!username || !password || !confirmPassword) {
+      setRegisterError("Please fill in all fields."); return;
+    }
+    if (password !== confirmPassword) {
+      setRegisterError("Passwords do not match."); return;
+    }
+    if (users.find(u => u.username === username)) {
+      setRegisterError("Username already taken."); return;
+    }
+    setUsers([...users, { username, password, role }]);
+    setRegisterError("");
+    // Auto-login after registration
+    setRole(role);
+    setView("dashboard");
   }
+
+  function handleLogout() {
+    setRole(null);
+    setView("login");
+    setLoginError("");
+    setRegisterError("");
+  }
+
+  // --- Booking helpers ---
 
   function isSlotBooked(doctorId, date, slot) {
     return bookings.some(b => b.doctorId === doctorId && b.date === date && b.slot === slot);
@@ -71,7 +106,8 @@ export default function ClinicSync() {
     }
     setBookings([...bookings, { id: Date.now(), doctorId: selectedDoctor, date: selectedDate, slot: selectedSlot, patient: patientName }]);
     setBookMsg(`✓ Appointment booked for ${patientName}!`);
-    setSelectedSlot(null); setPatientName("");
+    setSelectedSlot(null);
+    setPatientName("");
   }
 
   function handleCancel(id) {
@@ -87,7 +123,8 @@ export default function ClinicSync() {
   function confirmReschedule() {
     if (!rescheduleSlot) return;
     setBookings(bookings.map(b => b.id === rescheduleTarget.id ? { ...b, slot: rescheduleSlot } : b));
-    setRescheduleTarget(null); setView("dashboard");
+    setRescheduleTarget(null);
+    setView("dashboard");
   }
 
   function getDoctorName(id) {
@@ -106,12 +143,10 @@ export default function ClinicSync() {
   if (view === "login") {
     return (
       <LoginPage
-        username={username}
-        password={password}
-        loginError={loginError}
-        setUsername={setUsername}
-        setPassword={setPassword}
         onLogin={handleLogin}
+        onRegister={handleRegister}
+        loginError={loginError}
+        registerError={registerError}
       />
     );
   }
