@@ -1,4 +1,4 @@
-import { s } from "./styles";
+import { s } from "../styles";
 
 export default function PatientRecords({ patients, setPatients, editPatient, setEditPatient }) {
   return (

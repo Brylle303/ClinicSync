@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { DOCTORS, TODAY, colors } from "./constants";
 import { s } from "./styles";
-import LoginPage from "./LoginPage";
-import Dashboard from "./Dashboard";
-import BookAppointment from "./BookAppointment";
-import PatientRecords from "./PatientRecords";
-import DoctorSchedules from "./DoctorSchedules";
-import ReschedulePage from "./ReschedulePage";
+import LoginPage from "./pages/LoginPage";
+import Dashboard from "./pages/Dashboard";
+import BookAppointment from "./pages/BookAppointment";
+import PatientRecords from "./pages/PatientRecords";
+import DoctorSchedules from "./pages/DoctorSchedules";
+import ReschedulePage from "./pages/ReschedulePage";
 
 export default function ClinicSync() {
   const [role, setRole] = useState(null); // null | "patient" | "staff"

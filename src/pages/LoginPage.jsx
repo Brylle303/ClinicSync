@@ -1,5 +1,5 @@
-import { colors } from "./constants";
-import { s } from "./styles";
+import { colors } from "../constants";
+import { s } from "../styles";
 
 export default function LoginPage({ username, password, loginError, setUsername, setPassword, onLogin }) {
   return (

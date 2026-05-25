@@ -1,5 +1,5 @@
-import { DOCTORS, colors } from "./constants";
-import { s } from "./styles";
+import { DOCTORS, colors } from "../constants";
+import { s } from "../styles";
 
 export default function ReschedulePage({
   rescheduleTarget, rescheduleSlot, setRescheduleSlot,

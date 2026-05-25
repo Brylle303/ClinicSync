@@ -1,5 +1,5 @@
-import { DOCTORS, TODAY, colors } from "./constants";
-import { s } from "./styles";
+import { DOCTORS, TODAY, colors } from "../constants";
+import { s } from "../styles";
 
 export default function DoctorSchedules({
   blockedDates, blockDate, setBlockDate,
