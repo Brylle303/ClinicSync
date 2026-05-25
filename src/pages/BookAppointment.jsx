@@ -1,7 +1,8 @@
-import { DOCTORS, TODAY, colors } from "../constants";
+import { TODAY, colors } from "../constants";
 import { s } from "../styles";
 
 export default function BookAppointment({
+  doctors,
   selectedDoctor, setSelectedDoctor,
   selectedDate, setSelectedDate,
   selectedSlot, setSelectedSlot,
@@ -16,7 +17,7 @@ export default function BookAppointment({
 
       <div style={{ marginBottom: "18px" }}>
         <label style={s.label}>Select Doctor</label>
-        {DOCTORS.map(doc => (
+        {doctors.map(doc => (
           <div
             key={doc.id}
             style={s.doctorCard(selectedDoctor === doc.id)}
@@ -57,7 +58,10 @@ export default function BookAppointment({
         <div style={{ marginBottom: "18px" }}>
           <label style={s.label}>Available Time Slots</label>
           <div style={s.slotGrid}>
-            {DOCTORS.find(d => d.id === selectedDoctor)?.slots.map(slot => {
+            {doctors.find(d => d.id === selectedDoctor)?.slots.length === 0 && (
+              <span style={{ fontSize: "0.85rem", color: colors.muted }}>No slots available for this doctor.</span>
+            )}
+            {doctors.find(d => d.id === selectedDoctor)?.slots.map(slot => {
               const booked = isSlotBooked(selectedDoctor, selectedDate, slot);
               return (
                 <div

@@ -1,7 +1,7 @@
-import { DOCTORS, colors } from "../constants";
+import { colors } from "../constants";
 import { s } from "../styles";
 
-export default function Dashboard({ bookings, onReschedule, onCancel, getDoctorName }) {
+export default function Dashboard({ doctors, bookings, onReschedule, onCancel, getDoctorName }) {
   return (
     <>
       <div style={{ ...s.grid2, marginBottom: "18px" }}>
@@ -10,7 +10,7 @@ export default function Dashboard({ bookings, onReschedule, onCancel, getDoctorN
           <div style={{ color: colors.muted, fontSize: "0.9rem" }}>Total Appointments</div>
         </div>
         <div style={{ ...s.card, margin: 0, borderLeft: `4px solid ${colors.accent}` }}>
-          <div style={{ fontSize: "2rem", fontWeight: "bold", color: colors.accent }}>{DOCTORS.length}</div>
+          <div style={{ fontSize: "2rem", fontWeight: "bold", color: colors.accent }}>{doctors.length}</div>
           <div style={{ color: colors.muted, fontSize: "0.9rem" }}>Available Doctors</div>
         </div>
       </div>
@@ -62,7 +62,7 @@ export default function Dashboard({ bookings, onReschedule, onCancel, getDoctorN
 
       <div style={s.card}>
         <h2 style={s.h2}>Doctors on Duty</h2>
-        {DOCTORS.map(doc => (
+        {doctors.map(doc => (
           <div
             key={doc.id}
             style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: `1px solid ${colors.border}` }}

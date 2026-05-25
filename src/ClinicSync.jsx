@@ -20,6 +20,9 @@ export default function ClinicSync() {
   const [loginError, setLoginError] = useState("");
   const [registerError, setRegisterError] = useState("");
 
+  // Doctors (moved to state so slots can be edited)
+  const [doctors, setDoctors] = useState(DOCTORS);
+
   // Navigation
   const [view, setView] = useState("login");
 
@@ -128,7 +131,11 @@ export default function ClinicSync() {
   }
 
   function getDoctorName(id) {
-    return DOCTORS.find(d => d.id === id)?.name || "Unknown";
+    return doctors.find(d => d.id === id)?.name || "Unknown";
+  }
+
+  function handleUpdateSlots(doctorId, newSlots) {
+    setDoctors(doctors.map(d => d.id === doctorId ? { ...d, slots: newSlots } : d));
   }
 
   function handleBlockDate() {
@@ -187,6 +194,7 @@ export default function ClinicSync() {
       <div style={s.main}>
         {view === "dashboard" && (
           <Dashboard
+            doctors={doctors}
             bookings={bookings}
             onReschedule={handleReschedule}
             onCancel={handleCancel}
@@ -196,6 +204,7 @@ export default function ClinicSync() {
 
         {view === "book" && (
           <BookAppointment
+            doctors={doctors}
             selectedDoctor={selectedDoctor} setSelectedDoctor={setSelectedDoctor}
             selectedDate={selectedDate} setSelectedDate={setSelectedDate}
             selectedSlot={selectedSlot} setSelectedSlot={setSelectedSlot}
@@ -218,6 +227,8 @@ export default function ClinicSync() {
 
         {view === "schedule" && role === "staff" && (
           <DoctorSchedules
+            doctors={doctors}
+            onUpdateSlots={handleUpdateSlots}
             blockedDates={blockedDates}
             blockDate={blockDate} setBlockDate={setBlockDate}
             blockDoctor={blockDoctor} setBlockDoctor={setBlockDoctor}
