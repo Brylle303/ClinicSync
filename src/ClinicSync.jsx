@@ -43,7 +43,7 @@ export default function ClinicSync() {
     } else if (username === "patient" && password === "1234") {
       setRole("patient"); setView("dashboard"); setLoginError("");
     } else {
-      setLoginError("Invalid credentials. Try staff/1234 or patient/1234");
+      setLoginError("Invalid credentials.");
     }
   }
 

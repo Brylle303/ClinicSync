@@ -16,7 +16,7 @@ export default function LoginPage({ username, password, loginError, setUsername,
             style={s.input}
             value={username}
             onChange={e => setUsername(e.target.value)}
-            placeholder="staff or patient"
+            placeholder="Input username"
           />
         </div>
         <div style={{ marginBottom: "18px" }}>
@@ -26,7 +26,7 @@ export default function LoginPage({ username, password, loginError, setUsername,
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            placeholder="1234"
+            placeholder="Input password"
             onKeyDown={e => e.key === "Enter" && onLogin()}
           />
         </div>
