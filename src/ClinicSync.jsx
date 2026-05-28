@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DOCTORS, TODAY } from "./constants";
 import { s } from "./styles";
+import { supabase } from "./supabase";
 import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import BookAppointment from "./pages/BookAppointment";
@@ -8,23 +9,19 @@ import PatientRecords from "./pages/PatientRecords";
 import DoctorSchedules from "./pages/DoctorSchedules";
 import ReschedulePage from "./pages/ReschedulePage";
 
-const DEFAULT_USERS = [
-  { username: "staff", password: "1234", role: "staff" },
-  { username: "patient", password: "1234", role: "patient" },
-];
-
 export default function ClinicSync() {
   // Auth
-  const [users, setUsers] = useState(DEFAULT_USERS);
   const [role, setRole] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loginError, setLoginError] = useState("");
   const [registerError, setRegisterError] = useState("");
 
-  // Doctors (moved to state so slots can be edited)
-  const [doctors, setDoctors] = useState(DOCTORS);
+  // Doctors
+  const [doctors, setDoctors] = useState([]);
 
   // Navigation
   const [view, setView] = useState("login");
+  const [loading, setLoading] = useState(false);
 
   // Booking
   const [bookings, setBookings] = useState([]);
@@ -39,65 +36,123 @@ export default function ClinicSync() {
   const [rescheduleSlot, setRescheduleSlot] = useState(null);
 
   // Patient records
-  const [patients, setPatients] = useState([
-    { id: 1, name: "Juan dela Cruz", age: 34, contact: "09171234567", notes: "Hypertension" },
-    { id: 2, name: "Maria Garcia", age: 28, contact: "09281234567", notes: "Asthma" },
-  ]);
+  const [patients, setPatients] = useState([]);
   const [editPatient, setEditPatient] = useState(null);
 
   // Schedules
-  const [blockedDates, setBlockedDates] = useState({});
   const [blockDate, setBlockDate] = useState(TODAY);
-  const [blockDoctor, setBlockDoctor] = useState(DOCTORS[0].id);
+  const [blockDoctor, setBlockDoctor] = useState(null);
 
-  // --- Auth handlers ---
+  // -------------------------------------------------------
+  // Load data on login
+  // -------------------------------------------------------
+  useEffect(() => {
+    if (!role) return;
+    fetchDoctors();
+    fetchBookings();
+    if (role === "staff") fetchPatients();
+  }, [role]);
 
-  function handleLogin(username, password) {
-    const user = users.find(u => u.username === username && u.password === password);
-    if (user) {
-      setRole(user.role);
-      setView("dashboard");
-      setLoginError("");
-    } else {
-      setLoginError("Invalid credentials. Try staff/1234 or patient/1234");
-    }
+  async function fetchDoctors() {
+    const { data, error } = await supabase.from("doctors").select("*");
+    if (error) { console.error("fetchDoctors:", error); return; }
+    setDoctors(data);
+    if (data.length > 0) setBlockDoctor(data[0].id);
   }
 
-  function handleRegister(username, password, confirmPassword, role) {
+  async function fetchBookings() {
+    const { data, error } = await supabase.from("bookings").select("*").order("date", { ascending: true });
+    if (error) { console.error("fetchBookings:", error); return; }
+    setBookings(data);
+  }
+
+  async function fetchPatients() {
+    const { data, error } = await supabase.from("patients").select("*");
+    if (error) { console.error("fetchPatients:", error); return; }
+    setPatients(data);
+  }
+
+  // -------------------------------------------------------
+  // Auth
+  // -------------------------------------------------------
+  async function handleLogin(username, password) {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("username", username)
+      .eq("password", password)
+      .single();
+    setLoading(false);
+
+    if (error || !data) {
+      setLoginError("Invalid credentials."); return;
+    }
+    setCurrentUser(data);
+    setRole(data.role);
+    setView("dashboard");
+    setLoginError("");
+  }
+
+  async function handleRegister(username, password, confirmPassword, role) {
     if (!username || !password || !confirmPassword) {
       setRegisterError("Please fill in all fields."); return;
     }
     if (password !== confirmPassword) {
       setRegisterError("Passwords do not match."); return;
     }
-    if (users.find(u => u.username === username)) {
+
+    // Check if username already exists
+    const { data: existing } = await supabase
+      .from("users")
+      .select("id")
+      .eq("username", username)
+      .single();
+
+    if (existing) {
       setRegisterError("Username already taken."); return;
     }
-    setUsers([...users, { username, password, role }]);
-    setRegisterError("");
-    // Auto-login after registration
-    setRole(role);
+
+    const { data, error } = await supabase
+      .from("users")
+      .insert({ username, password, role })
+      .select()
+      .single();
+
+    if (error) {
+      setRegisterError("Registration failed. Try again."); return;
+    }
+
+    setCurrentUser(data);
+    setRole(data.role);
     setView("dashboard");
+    setRegisterError("");
   }
 
   function handleLogout() {
     setRole(null);
+    setCurrentUser(null);
     setView("login");
+    setDoctors([]);
+    setBookings([]);
+    setPatients([]);
     setLoginError("");
     setRegisterError("");
   }
 
-  // --- Booking helpers ---
-
+  // -------------------------------------------------------
+  // Booking
+  // -------------------------------------------------------
   function isSlotBooked(doctorId, date, slot) {
-    return bookings.some(b => b.doctorId === doctorId && b.date === date && b.slot === slot);
+    return bookings.some(b => b.doctor_id === doctorId && b.date === date && b.slot === slot);
   }
 
   function isDateBlocked(doctorId, date) {
-    return blockedDates[doctorId]?.includes(date);
+    const doc = doctors.find(d => d.id === doctorId);
+    return doc?.blocked_dates?.includes(date) ?? false;
   }
 
-  function handleBook() {
+  async function handleBook() {
     if (!selectedDoctor || !selectedSlot || !patientName) {
       setBookMsg("Please fill in all fields."); return;
     }
@@ -107,13 +162,24 @@ export default function ClinicSync() {
     if (isDateBlocked(selectedDoctor, selectedDate)) {
       setBookMsg("Doctor is unavailable on that date."); return;
     }
-    setBookings([...bookings, { id: Date.now(), doctorId: selectedDoctor, date: selectedDate, slot: selectedSlot, patient: patientName }]);
+
+    const { data, error } = await supabase
+      .from("bookings")
+      .insert({ doctor_id: selectedDoctor, date: selectedDate, slot: selectedSlot, patient: patientName })
+      .select()
+      .single();
+
+    if (error) { setBookMsg("Booking failed. Try again."); return; }
+
+    setBookings([...bookings, data]);
     setBookMsg(`✓ Appointment booked for ${patientName}!`);
     setSelectedSlot(null);
     setPatientName("");
   }
 
-  function handleCancel(id) {
+  async function handleCancel(id) {
+    const { error } = await supabase.from("bookings").delete().eq("id", id);
+    if (error) { console.error("handleCancel:", error); return; }
     setBookings(bookings.filter(b => b.id !== id));
   }
 
@@ -123,8 +189,15 @@ export default function ClinicSync() {
     setView("reschedule");
   }
 
-  function confirmReschedule() {
+  async function confirmReschedule() {
     if (!rescheduleSlot) return;
+    const { error } = await supabase
+      .from("bookings")
+      .update({ slot: rescheduleSlot })
+      .eq("id", rescheduleTarget.id);
+
+    if (error) { console.error("confirmReschedule:", error); return; }
+
     setBookings(bookings.map(b => b.id === rescheduleTarget.id ? { ...b, slot: rescheduleSlot } : b));
     setRescheduleTarget(null);
     setView("dashboard");
@@ -134,19 +207,50 @@ export default function ClinicSync() {
     return doctors.find(d => d.id === id)?.name || "Unknown";
   }
 
-  function handleUpdateSlots(doctorId, newSlots) {
+  // -------------------------------------------------------
+  // Doctor slots
+  // -------------------------------------------------------
+  async function handleUpdateSlots(doctorId, newSlots) {
+    const { error } = await supabase
+      .from("doctors")
+      .update({ slots: newSlots })
+      .eq("id", doctorId);
+
+    if (error) { console.error("handleUpdateSlots:", error); return; }
     setDoctors(doctors.map(d => d.id === doctorId ? { ...d, slots: newSlots } : d));
   }
 
-  function handleBlockDate() {
-    setBlockedDates(prev => ({
-      ...prev,
-      [blockDoctor]: [...(prev[blockDoctor] || []), blockDate].filter((v, i, a) => a.indexOf(v) === i),
-    }));
+  async function handleBlockDate() {
+    const doc = doctors.find(d => d.id === blockDoctor);
+    if (!doc) return;
+    const updatedBlocked = [...(doc.blocked_dates || []), blockDate].filter((v, i, a) => a.indexOf(v) === i);
+
+    const { error } = await supabase
+      .from("doctors")
+      .update({ blocked_dates: updatedBlocked })
+      .eq("id", blockDoctor);
+
+    if (error) { console.error("handleBlockDate:", error); return; }
+    setDoctors(doctors.map(d => d.id === blockDoctor ? { ...d, blocked_dates: updatedBlocked } : d));
   }
 
-  // --- Routing ---
+  // -------------------------------------------------------
+  // Patient records
+  // -------------------------------------------------------
+  async function handleSavePatient(updatedPatient) {
+    const { error } = await supabase
+      .from("patients")
+      .update({ name: updatedPatient.name, age: updatedPatient.age, contact: updatedPatient.contact, notes: updatedPatient.notes })
+      .eq("id", updatedPatient.id);
 
+    if (error) { console.error("handleSavePatient:", error); return; }
+    setPatients(patients.map(p => p.id === updatedPatient.id ? updatedPatient : p));
+    setEditPatient(null);
+  }
+
+  // -------------------------------------------------------
+  // Routing
+  // -------------------------------------------------------
   if (view === "login") {
     return (
       <LoginPage
@@ -154,6 +258,7 @@ export default function ClinicSync() {
         onRegister={handleRegister}
         loginError={loginError}
         registerError={registerError}
+        loading={loading}
       />
     );
   }
@@ -167,6 +272,7 @@ export default function ClinicSync() {
         isSlotBooked={isSlotBooked}
         onConfirm={confirmReschedule}
         onCancel={() => setView("dashboard")}
+        doctors={doctors}
       />
     );
   }
@@ -219,9 +325,9 @@ export default function ClinicSync() {
         {view === "records" && role === "staff" && (
           <PatientRecords
             patients={patients}
-            setPatients={setPatients}
             editPatient={editPatient}
             setEditPatient={setEditPatient}
+            onSavePatient={handleSavePatient}
           />
         )}
 
@@ -229,7 +335,6 @@ export default function ClinicSync() {
           <DoctorSchedules
             doctors={doctors}
             onUpdateSlots={handleUpdateSlots}
-            blockedDates={blockedDates}
             blockDate={blockDate} setBlockDate={setBlockDate}
             blockDoctor={blockDoctor} setBlockDoctor={setBlockDoctor}
             onBlockDate={handleBlockDate}

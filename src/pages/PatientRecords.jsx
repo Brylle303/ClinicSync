@@ -1,6 +1,6 @@
 import { s } from "../styles";
 
-export default function PatientRecords({ patients, setPatients, editPatient, setEditPatient }) {
+export default function PatientRecords({ patients, editPatient, setEditPatient, onSavePatient }) {
   return (
     <div style={s.card}>
       <h2 style={s.h2}>Patient Records</h2>
@@ -19,26 +19,12 @@ export default function PatientRecords({ patients, setPatients, editPatient, set
             <tr key={p.id}>
               {editPatient?.id === p.id ? (
                 <>
+                  <td style={s.td}><input style={{ ...s.input, padding: "5px 8px" }} value={editPatient.name} onChange={e => setEditPatient({ ...editPatient, name: e.target.value })} /></td>
+                  <td style={s.td}><input style={{ ...s.input, padding: "5px 8px", width: "60px" }} value={editPatient.age} onChange={e => setEditPatient({ ...editPatient, age: e.target.value })} /></td>
+                  <td style={s.td}><input style={{ ...s.input, padding: "5px 8px" }} value={editPatient.contact} onChange={e => setEditPatient({ ...editPatient, contact: e.target.value })} /></td>
+                  <td style={s.td}><input style={{ ...s.input, padding: "5px 8px" }} value={editPatient.notes} onChange={e => setEditPatient({ ...editPatient, notes: e.target.value })} /></td>
                   <td style={s.td}>
-                    <input style={{ ...s.input, padding: "5px 8px" }} value={editPatient.name} onChange={e => setEditPatient({ ...editPatient, name: e.target.value })} />
-                  </td>
-                  <td style={s.td}>
-                    <input style={{ ...s.input, padding: "5px 8px", width: "60px" }} value={editPatient.age} onChange={e => setEditPatient({ ...editPatient, age: e.target.value })} />
-                  </td>
-                  <td style={s.td}>
-                    <input style={{ ...s.input, padding: "5px 8px" }} value={editPatient.contact} onChange={e => setEditPatient({ ...editPatient, contact: e.target.value })} />
-                  </td>
-                  <td style={s.td}>
-                    <input style={{ ...s.input, padding: "5px 8px" }} value={editPatient.notes} onChange={e => setEditPatient({ ...editPatient, notes: e.target.value })} />
-                  </td>
-                  <td style={s.td}>
-                    <button
-                      style={{ ...s.btn("success"), padding: "5px 12px", fontSize: "0.8rem" }}
-                      onClick={() => {
-                        setPatients(patients.map(x => x.id === editPatient.id ? editPatient : x));
-                        setEditPatient(null);
-                      }}
-                    >
+                    <button style={{ ...s.btn("success"), padding: "5px 12px", fontSize: "0.8rem" }} onClick={() => onSavePatient(editPatient)}>
                       Save
                     </button>
                   </td>
@@ -50,10 +36,7 @@ export default function PatientRecords({ patients, setPatients, editPatient, set
                   <td style={s.td}>{p.contact}</td>
                   <td style={s.td}>{p.notes}</td>
                   <td style={s.td}>
-                    <button
-                      style={{ ...s.btn("primary"), padding: "5px 12px", fontSize: "0.8rem" }}
-                      onClick={() => setEditPatient({ ...p })}
-                    >
+                    <button style={{ ...s.btn("primary"), padding: "5px 12px", fontSize: "0.8rem" }} onClick={() => setEditPatient({ ...p })}>
                       Edit
                     </button>
                   </td>
