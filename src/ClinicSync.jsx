@@ -58,8 +58,10 @@ export default function ClinicSync() {
     if (data) { setDoctors(data); setBlockDoctor(data[0]?.id); }
   }
   async function fetchBookings() {
-    const { data } = await supabase.from("bookings").select("*").order("date", { ascending: true });
-    if (data) setBookings(data);
+  let query = supabase.from("bookings").select("*").order("date", { ascending: true });
+  if (role === "patient") query = query.eq("username", currentUser.username);
+  const { data } = await query;
+  if (data) setBookings(data);
   }
   async function fetchPatients() {
     const { data } = await supabase.from("patients").select("*");
@@ -111,7 +113,11 @@ export default function ClinicSync() {
     if (!selectedDoctor || !selectedSlot || !patientName) { setBookMsg("Please fill in all fields."); return; }
     if (isSlotBooked(selectedDoctor, selectedDate, selectedSlot)) { setBookMsg("That slot is already booked."); return; }
     if (isDateBlocked(selectedDoctor, selectedDate)) { setBookMsg("Doctor is unavailable on that date."); return; }
-    const { data, error } = await supabase.from("bookings").insert({ doctor_id: selectedDoctor, date: selectedDate, slot: selectedSlot, patient: patientName }).select().single();
+    const { data, error } = await supabase
+      .from("bookings")
+      .insert({ doctor_id: selectedDoctor, date: selectedDate, slot: selectedSlot, patient: patientName, username: currentUser.username })
+      .select().single();
+
     if (error) { setBookMsg("Booking failed."); return; }
     setBookings([...bookings, data]);
     setBookMsg(`✓ Appointment booked for ${patientName}!`);
@@ -138,7 +144,7 @@ export default function ClinicSync() {
   }
 
   function getDoctorName(id) {
-    return doctors.find(d => d.id === id)?.name || "Unknown";
+    return doctors.find(d => d.id == id)?.name || "Unknown";
   }
 
   // -------------------------------------------------------
