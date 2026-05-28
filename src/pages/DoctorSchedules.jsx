@@ -4,7 +4,7 @@ import { s } from "../styles";
 
 export default function DoctorSchedules({
   doctors, onUpdateSlots,
-  blockedDates, blockDate, setBlockDate,
+  blockDate, setBlockDate,
   blockDoctor, setBlockDoctor, onBlockDate,
 }) {
   const [editingId, setEditingId] = useState(null);
@@ -119,11 +119,12 @@ export default function DoctorSchedules({
               </div>
             )}
 
-            {blockedDates[doc.id]?.length > 0 && (
+            {doc.blocked_dates?.length > 0 && (
               <div style={{ marginTop: "8px", fontSize: "0.83rem", color: colors.danger }}>
-                Blocked dates: {blockedDates[doc.id].join(", ")}
+                Blocked dates: {doc.blocked_dates.join(", ")}
               </div>
             )}
+
           </div>
         ))}
       </div>
