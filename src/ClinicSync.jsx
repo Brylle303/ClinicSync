@@ -16,6 +16,7 @@ export default function ClinicSync() {
 
   // Auth
   const [role, setRole] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loginError, setLoginError] = useState("");
   const [registerError, setRegisterError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,22 +48,26 @@ export default function ClinicSync() {
   // Fetch on login
   // -------------------------------------------------------
   useEffect(() => {
-    if (!role) return;
-    fetchDoctors();
-    fetchBookings();
-    if (role === "staff") fetchPatients();
-  }, [role]);
+    if (!currentUser) return;
+    fetchDoctors().then(doctorData => {
+      fetchBookings(currentUser);
+    });
+    if (currentUser.role === "staff") fetchPatients();
+  }, [currentUser]);
 
   async function fetchDoctors() {
     const { data } = await supabase.from("doctors").select("*");
     if (data) { setDoctors(data); setBlockDoctor(data[0]?.id); }
+    return data;
   }
-  async function fetchBookings() {
-  let query = supabase.from("bookings").select("*").order("date", { ascending: true });
-  if (role === "patient") query = query.eq("username", currentUser.username);
-  const { data } = await query;
-  if (data) setBookings(data);
+
+  async function fetchBookings(user) {
+    let query = supabase.from("bookings").select("*").order("date", { ascending: true });
+    if (user.role === "patient") query = query.eq("username", user.username);
+    const { data } = await query;
+    if (data) setBookings(data);
   }
+
   async function fetchPatients() {
     const { data } = await supabase.from("patients").select("*");
     if (data) setPatients(data);
@@ -79,6 +84,7 @@ export default function ClinicSync() {
     setRole(data.role);
     setLoginError("");
     navigate("/dashboard");
+    setCurrentUser(data);
   }
 
   async function handleRegister(username, password, confirmPassword, role) {
@@ -91,12 +97,14 @@ export default function ClinicSync() {
     setRole(data.role);
     setRegisterError("");
     navigate("/dashboard");
+    setCurrentUser(data);
   }
 
   function handleLogout() {
     setRole(null);
     setDoctors([]); setBookings([]); setPatients([]);
     navigate("/");
+    setCurrentUser(null);
   }
 
   // -------------------------------------------------------
@@ -144,6 +152,8 @@ export default function ClinicSync() {
   }
 
   function getDoctorName(id) {
+    console.log("doctors array:", doctors);
+    console.log("looking for id:", id, typeof id);
     return doctors.find(d => d.id == id)?.name || "Unknown";
   }
 

@@ -34,7 +34,7 @@ export default function Dashboard({ doctors, bookings, onReschedule, onCancel, g
               {bookings.map(b => (
                 <tr key={b.id}>
                   <td style={s.td}>{b.patient}</td>
-                  <td style={s.td}>{getDoctorName(b.doctorId)}</td>
+                  <td style={s.td}>{getDoctorName(b.doctor_id)}</td>
                   <td style={s.td}>{b.date}</td>
                   <td style={s.td}>{b.slot}</td>
                   <td style={s.td}>
