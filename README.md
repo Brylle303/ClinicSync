@@ -8,4 +8,5 @@
 This project serves as the final requirement in the course CPE 2201
 
 **Frontend:** React + Netlify
+
 **Backend:** Supabase
