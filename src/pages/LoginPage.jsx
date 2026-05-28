@@ -26,7 +26,7 @@ export default function LoginPage({ onLogin, onRegister, loginError, registerErr
 
   return (
     <div style={{ ...s.app, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ background: colors.card, border: `1px solid ${colors.border}`, borderRadius: "12px", padding: "40px", width: "380px", boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }}>
+      <div style={{ background: colors.card, border: `1px solid ${colors.border}`, borderRadius: "12px", padding: "40px", maxWidth: "380px", boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }}>
 
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: "24px" }}>

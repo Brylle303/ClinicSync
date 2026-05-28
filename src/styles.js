@@ -30,7 +30,7 @@ export const s = {
     padding: "14px 18px", borderRadius: "8px", border: `2px solid ${selected ? colors.primary : colors.border}`,
     background: selected ? colors.primaryLight : colors.card, cursor: "pointer", marginBottom: "10px"
   }),
-  grid2: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" },
+  grid2: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "16px" },
   msg: (type) => ({ padding: "10px 14px", borderRadius: "6px", marginTop: "12px", fontSize: "0.9rem", background: type === "success" ? "#d4edda" : "#f8d7da", color: type === "success" ? "#155724" : "#721c24" }),
   table: { width: "100%", borderCollapse: "collapse" },
   th: { textAlign: "left", padding: "10px 12px", fontSize: "0.8rem", color: colors.muted, borderBottom: `1px solid ${colors.border}`, fontWeight: "600", letterSpacing: "0.5px", textTransform: "uppercase" },
