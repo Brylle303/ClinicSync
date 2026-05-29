@@ -74,7 +74,11 @@ export default function BookAppointment({
     };
 
     const weekDates = getWeekDates();
-    const standardTimes = ["09:00 AM", "10:00 AM", "11:00 AM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM"];
+    const staffDocObj = doctors.find(doc => doc.id === staffDocId);
+    const baseTimes = ["09:00 AM", "10:00 AM", "11:00 AM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM"];
+    
+    const displayTimes = Array.from(new Set([...baseTimes, ...(staffDocObj?.slots || [])]))
+      .sort((a, b) => new Date('1970/01/01 ' + a) - new Date('1970/01/01 ' + b));
     
     const displayMonthDate = new Date();
     displayMonthDate.setMonth(displayMonthDate.getMonth() + monthOffset);
@@ -170,7 +174,7 @@ export default function BookAppointment({
                             )}
                           </>
                         )}
-                        {isBlockedDay && !booking && <div className="blocked-text">Day Off</div>}
+                        {isBlockedDay && !booking && <div className="blocked-text"></div>}
                         {isSlotManuallyBlocked && <div className="blocked-text">Unavailable</div>}
                       </div>
                     );
@@ -206,10 +210,21 @@ export default function BookAppointment({
                     key={day} 
                     className={`month-cell ${isBlocked ? 'blocked' : ''} ${dateStr === TODAY ? 'is-today' : ''}`}
                     onClick={(e) => {
-                       e.stopPropagation();
-                       setWeekOffset(Math.floor((d - new Date()) / (1000 * 60 * 60 * 24 * 7)));
-                       setStaffView('weekly');
-                    }}
+                      e.stopPropagation();
+                      
+                      const targetDate = new Date(d);
+                      targetDate.setHours(0, 0, 0, 0);
+                      const todayDate = new Date();
+                      todayDate.setHours(0, 0, 0, 0);
+                      
+                      targetDate.setDate(targetDate.getDate() - targetDate.getDay());
+                      todayDate.setDate(todayDate.getDate() - todayDate.getDay());
+                      
+                      const weekDiff = Math.round((targetDate - todayDate) / (1000 * 60 * 60 * 24 * 7));
+                      
+                      setWeekOffset(weekDiff);
+                      setStaffView('weekly');
+                   }}
                   >
                     <span className="month-day-num">{day}</span>
                     {dayBookings.length > 0 && <span className="monthly-badge">{dayBookings.length} Appt(s)</span>}
