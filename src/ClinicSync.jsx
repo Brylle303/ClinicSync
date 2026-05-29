@@ -168,12 +168,31 @@ export default function ClinicSync() {
     navigate("/reschedule");
   }
 
-  async function confirmReschedule() {
-    if (!rescheduleSlot) return;
-    await supabase.from("bookings").update({ slot: rescheduleSlot }).eq("id", rescheduleTarget.id);
-    setBookings(bookings.map(b => b.id === rescheduleTarget.id ? { ...b, slot: rescheduleSlot } : b));
-    setRescheduleTarget(null);
-    navigate("/dashboard");
+  // --- RESCHEDULING LOGIC ---
+  async function confirmReschedule(newDate, newSlot) {
+    if (!rescheduleTarget) return;
+
+    const { error, data } = await supabase
+      .from("bookings")
+      .update({ date: newDate, slot: newSlot })
+      .eq("id", rescheduleTarget.id)
+      .select()
+      .single();
+
+    if (!error && data) {
+      setBookings(bookings.map(b => 
+        b.id === rescheduleTarget.id 
+          ? { ...b, date: newDate, slot: newSlot } 
+          : b
+      ));
+      
+      setRescheduleTarget(null);
+      setRescheduleSlot(null);
+      navigate("/dashboard");
+    } else {
+      console.error("Failed to reschedule appointment:", error);
+      alert("There was an error rescheduling. Please try again.");
+    }
   }
 
   function getDoctorName(id) {

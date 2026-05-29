@@ -27,7 +27,12 @@ export default function BookAppointment({
   const visibleDates = Array.from({ length: 14 }).map((_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + dayOffset + i);
-    return d.toISOString().split("T")[0]; 
+    
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
   });
 
   const filteredDoctors = doctors.filter(doc => 
@@ -58,10 +63,16 @@ export default function BookAppointment({
       for(let i = 0; i < 7; i++) {
         const d = new Date(start);
         d.setDate(d.getDate() + i);
-        dates.push(d.toISOString().split("T")[0]);
+        
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        
+        dates.push(`${year}-${month}-${day}`);
       }
       return dates;
     };
+
     const weekDates = getWeekDates();
     const standardTimes = ["09:00 AM", "10:00 AM", "11:00 AM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM"];
     
