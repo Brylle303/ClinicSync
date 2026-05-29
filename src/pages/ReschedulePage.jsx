@@ -1,11 +1,11 @@
-import { DOCTORS, colors } from "../constants";
+import { colors } from "../constants";
 import { s } from "../styles";
 
 export default function ReschedulePage({
   rescheduleTarget, rescheduleSlot, setRescheduleSlot,
-  isSlotBooked, onConfirm, onCancel,
+  isSlotBooked, onConfirm, onCancel, doctors,
 }) {
-  const doc = DOCTORS.find(d => d.id === rescheduleTarget.doctorId);
+  const doc = doctors.find(d => d.id == rescheduleTarget.doctor_id);
 
   return (
     <div style={s.app}>
@@ -21,14 +21,20 @@ export default function ReschedulePage({
           <h3 style={s.h3}>Pick a new time slot:</h3>
           <div style={s.slotGrid}>
             {doc?.slots.map(slot => {
-              const booked = isSlotBooked(rescheduleTarget.doctorId, rescheduleTarget.date, slot) && slot !== rescheduleTarget.slot;
+              const isCurrent = slot === rescheduleTarget.slot;
+              const booked = !isCurrent && isSlotBooked(rescheduleTarget.doctor_id, rescheduleTarget.date, slot);
               return (
                 <div
                   key={slot}
-                  style={s.slot(!booked, rescheduleSlot === slot)}
-                  onClick={() => !booked && setRescheduleSlot(slot)}
+                  style={{
+                    ...s.slot(!booked, rescheduleSlot === slot),
+                    opacity: isCurrent ? 0.4 : 1,
+                    cursor: booked || isCurrent ? "not-allowed" : "pointer",
+                  }}
+                  onClick={() => !booked && !isCurrent && setRescheduleSlot(slot)}
+                  title={isCurrent ? "Current slot" : booked ? "Already booked" : ""}
                 >
-                  {slot}
+                  {slot} {isCurrent ? "(current)" : ""}
                 </div>
               );
             })}
