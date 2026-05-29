@@ -601,3 +601,35 @@
     background: #c0392b;
     border-color: white;
   }
+
+/* --- PATIENT BOOKING INPUT --- */
+  .booking-for-section {
+    margin-top: 25px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .booking-for-section label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #537055;
+  }
+
+  .patient-name-input {
+    padding: 14px 20px;
+    border: 1px solid #d1dce8;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #3e5942;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .patient-name-input:focus {
+    border-color: #537055;
+  }
