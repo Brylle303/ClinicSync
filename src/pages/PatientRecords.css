@@ -1,0 +1,26 @@
+.records-wrapper { max-width: 1000px; margin: 0 auto; font-family: 'Inter', sans-serif; }
+.records-search-input { width: 100%; padding: 16px 20px; font-size: 1.05rem; border: 1px solid #d1dce8; border-radius: 12px; outline: none; margin-bottom: 25px; transition: border-color 0.2s; }
+.records-search-input:focus { border-color: #537055; }
+.table-card { background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow: hidden; border: 1px solid #d1dce8; }
+.records-table { width: 100%; border-collapse: collapse; text-align: left; }
+.records-table th { background-color: #f4f7f5; padding: 16px 20px; color: #537055; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; border-bottom: 2px solid #e8f0ea; }
+.records-table td { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; color: #3e5942; }
+.records-table tr:hover { background-color: #fafbfa; }
+.fw-bold { font-weight: 700; color: #537055; }
+.notes-cell { max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #8ba091; font-size: 0.95rem; }
+.edit-btn { background: #e8f0ea; color: #537055; border: none; padding: 6px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.edit-btn:hover { background: #537055; color: white; }
+.empty-state { text-align: center; color: #8ba091; padding: 40px !important; }
+
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+.modal-card { background: white; width: 100%; max-width: 500px; border-radius: 12px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); animation: slideUp 0.3s ease-out; }
+.modal-card h2 { color: #537055; margin: 0 0 20px 0; }
+.edit-form .input-row { display: flex; gap: 15px; }
+.edit-form .input-group { flex: 1; display: flex; flex-direction: column; margin-bottom: 15px; }
+.edit-form label { font-size: 0.9rem; font-weight: 700; color: #537055; margin-bottom: 5px; }
+.edit-form input, .edit-form textarea { padding: 12px; border: 1px solid #d1dce8; border-radius: 8px; font-family: inherit; font-size: 0.95rem; outline: none; }
+.edit-form input:focus, .edit-form textarea:focus { border-color: #537055; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.cancel-btn { background: none; border: 1px solid #d1dce8; color: #8ba091; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+.save-btn { background: #537055; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }

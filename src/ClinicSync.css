@@ -1,0 +1,97 @@
+.clinicsync-app {
+    min-height: 100vh;
+    background-color: #f4f7f5;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .top-navbar {
+    background-color: #537055; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 5%;
+    color: white;
+  }
+  
+  .nav-left, .nav-right {
+    flex: 1;
+  }
+  
+  .nav-right {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .nav-logo {
+    height: 35px;
+    cursor: pointer;
+    filter: brightness(0) invert(1); 
+  }
+  
+  .nav-center {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .nav-item-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .nav-link {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+    padding: 0;
+    font-family: inherit;
+  }
+  
+  .nav-link:hover {
+    opacity: 1;
+  }
+  
+  .nav-link.active {
+    opacity: 1;
+    font-weight: 700;
+  }
+  
+  .active-dot {
+    width: 6px;
+    height: 6px;
+    background-color: white;
+    border-radius: 50%;
+    display: block;
+  }
+  
+  .logout-btn {
+    background-color: white;
+    color: #537055;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    font-family: inherit;
+  }
+  
+  .logout-btn:hover {
+    opacity: 0.9;
+  }
+
+  .main-content {
+    padding: 40px 5%;
+    flex: 1;
+  }
