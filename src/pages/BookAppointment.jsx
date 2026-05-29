@@ -2,13 +2,24 @@ import { TODAY, colors } from "../constants";
 import { s } from "../styles";
 
 export default function BookAppointment({
-  doctors, currentUser,
-  selectedDoctor, setSelectedDoctor,
-  selectedDate, setSelectedDate,
-  selectedSlot, setSelectedSlot,
-  patientName, setPatientName,
-  bookMsg, setBookMsg,
-  isSlotBooked, isDateBlocked,
+  doctors,
+  currentUser,
+  selectedDoctor,
+  setSelectedDoctor,
+  selectedDate,
+  setSelectedDate,
+  selectedSlot,
+  setSelectedSlot,
+  patientName,
+  setPatientName,
+  patientAge,
+  setPatientAge,
+  patientContact,
+  setPatientContact,
+  bookMsg,
+  setBookMsg,
+  isSlotBooked,
+  isDateBlocked,
   onBook,
 }) {
   return (
@@ -17,31 +28,83 @@ export default function BookAppointment({
 
       <div style={{ marginBottom: "18px" }}>
         <label style={s.label}>Select Doctor</label>
+
         {doctors.map(doc => (
           <div
             key={doc.id}
             style={s.doctorCard(selectedDoctor === doc.id)}
-            onClick={() => { setSelectedDoctor(doc.id); setSelectedSlot(null); setBookMsg(""); }}
+            onClick={() => {
+              setSelectedDoctor(doc.id);
+              setSelectedSlot(null);
+              setBookMsg("");
+            }}
           >
             <strong>{doc.name}</strong>
-            <span style={{ fontSize: "0.83rem", color: colors.muted, marginLeft: "10px" }}>{doc.specialty}</span>
+
+            <span
+              style={{
+                fontSize: "0.83rem",
+                color: colors.muted,
+                marginLeft: "10px",
+              }}
+            >
+              {doc.specialty}
+            </span>
+
             {isDateBlocked(doc.id, selectedDate) && (
-              <span style={{ fontSize: "0.78rem", color: colors.danger, marginLeft: "10px" }}>⚠ Unavailable on selected date</span>
+              <span
+                style={{
+                  fontSize: "0.78rem",
+                  color: colors.danger,
+                  marginLeft: "10px",
+                }}
+              >
+                ⚠ Unavailable on selected date
+              </span>
             )}
           </div>
         ))}
       </div>
 
-      <div style={{ ...s.grid2, marginBottom: "18px" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "16px",
+          marginBottom: "18px",
+        }}
+      >
         <div>
           <label style={s.label}>Patient Name</label>
           <input
             style={s.input}
             value={patientName}
             onChange={e => setPatientName(e.target.value)}
-            placeholder={currentUser?.username || "Full name"}
+            placeholder={"Full Name"}
           />
         </div>
+
+        <div>
+          <label style={s.label}>Age</label>
+          <input
+            style={s.input}
+            type="number"
+            value={patientAge}
+            onChange={e => setPatientAge(e.target.value)}
+            placeholder="Age"
+          />
+        </div>
+
+        <div>
+          <label style={s.label}>Contact Number</label>
+          <input
+            style={s.input}
+            value={patientContact}
+            onChange={e => setPatientContact(e.target.value)}
+            placeholder="09XXXXXXXXX"
+          />
+        </div>
+
         <div>
           <label style={s.label}>Date</label>
           <input
@@ -49,7 +112,10 @@ export default function BookAppointment({
             type="date"
             value={selectedDate}
             min={TODAY}
-            onChange={e => { setSelectedDate(e.target.value); setSelectedSlot(null); }}
+            onChange={e => {
+              setSelectedDate(e.target.value);
+              setSelectedSlot(null);
+            }}
           />
         </div>
       </div>
@@ -57,12 +123,17 @@ export default function BookAppointment({
       {selectedDoctor && (
         <div style={{ marginBottom: "18px" }}>
           <label style={s.label}>Available Time Slots</label>
+
           <div style={s.slotGrid}>
             {doctors.find(d => d.id === selectedDoctor)?.slots.length === 0 && (
-              <span style={{ fontSize: "0.85rem", color: colors.muted }}>No slots available for this doctor.</span>
+              <span style={{ fontSize: "0.85rem", color: colors.muted }}>
+                No slots available for this doctor.
+              </span>
             )}
+
             {doctors.find(d => d.id === selectedDoctor)?.slots.map(slot => {
               const booked = isSlotBooked(selectedDoctor, selectedDate, slot);
+
               return (
                 <div
                   key={slot}
@@ -77,8 +148,15 @@ export default function BookAppointment({
         </div>
       )}
 
-      <button style={s.btn("success")} onClick={onBook}>Confirm Booking</button>
-      {bookMsg && <div style={s.msg(bookMsg.startsWith("✓") ? "success" : "error")}>{bookMsg}</div>}
+      <button style={s.btn("success")} onClick={onBook}>
+        Confirm Booking
+      </button>
+
+      {bookMsg && (
+        <div style={s.msg(bookMsg.startsWith("✓") ? "success" : "error")}>
+          {bookMsg}
+        </div>
+      )}
     </div>
   );
 }

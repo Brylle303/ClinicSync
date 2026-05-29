@@ -5,7 +5,7 @@ import { s } from "../styles";
 export default function DoctorSchedules({
   doctors, onUpdateSlots,
   blockDate, setBlockDate,
-  blockDoctor, setBlockDoctor, onBlockDate,
+  blockDoctor, setBlockDoctor, onBlockDate, onUnblockDate,
 }) {
   const [editingId, setEditingId] = useState(null);
   const [newSlot, setNewSlot] = useState("");
@@ -119,11 +119,46 @@ export default function DoctorSchedules({
               </div>
             )}
 
-            {doc.blocked_dates?.length > 0 && (
-              <div style={{ marginTop: "8px", fontSize: "0.83rem", color: colors.danger }}>
-                Blocked dates: {doc.blocked_dates.join(", ")}
-              </div>
-            )}
+                      {doc.blocked_dates?.length > 0 && (
+            <div style={{ marginTop: "12px", display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center" }}>
+              <span style={{ fontSize: "0.85rem", color: colors.muted, fontWeight: "500" }}>Blocked Dates:</span>
+              {doc.blocked_dates.map(date => (
+                <span 
+                  key={date} 
+                  style={{ 
+                    display: "inline-flex", 
+                    alignItems: "center", 
+                    gap: "6px", 
+                    backgroundColor: "#fee2e2", 
+                    color: colors.danger, 
+                    padding: "4px 10px", 
+                    borderRadius: "6px", 
+                    fontSize: "0.8rem",
+                    fontWeight: "500"
+                  }}
+                >
+                  {date}
+                  <button 
+                    onClick={() => onUnblockDate(doc.id, date)}
+                    style={{ 
+                      background: "none", 
+                      border: "none", 
+                      color: colors.danger, 
+                      cursor: "pointer", 
+                      fontWeight: "bold",
+                      padding: "0 2px",
+                      fontSize: "0.85rem",
+                      display: "inline-flex",
+                      alignItems: "center"
+                    }}
+                    title="Unblock this date"
+                  >
+                    ✕
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
 
           </div>
         ))}
