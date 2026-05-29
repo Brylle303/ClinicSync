@@ -1,13 +1,17 @@
 import { colors } from "../constants";
 import { s } from "../styles";
 
-export default function Dashboard({ doctors, bookings, onReschedule, onCancel, getDoctorName }) {
+export default function Dashboard({ role, doctors, bookings, onReschedule, onCancel, getDoctorName }) {
+  const isPatient = role === "patient";
+  const statLabel = isPatient ? "Your Appointments" : "Total Pending Appointments";
+  const sectionTitle = isPatient ? "Your Appointments" : "Total Pending Appointments";
+
   return (
     <>
       <div style={{ ...s.grid2, marginBottom: "18px" }}>
         <div style={{ ...s.card, margin: 0, borderLeft: `4px solid ${colors.primary}` }}>
           <div style={{ fontSize: "2rem", fontWeight: "bold", color: colors.primary }}>{bookings.length}</div>
-          <div style={{ color: colors.muted, fontSize: "0.9rem" }}>Total Appointments</div>
+          <div style={{ color: colors.muted, fontSize: "0.9rem" }}>{statLabel}</div>
         </div>
         <div style={{ ...s.card, margin: 0, borderLeft: `4px solid ${colors.accent}` }}>
           <div style={{ fontSize: "2rem", fontWeight: "bold", color: colors.accent }}>{doctors.length}</div>
@@ -16,7 +20,7 @@ export default function Dashboard({ doctors, bookings, onReschedule, onCancel, g
       </div>
 
       <div style={s.card}>
-        <h2 style={s.h2}>Upcoming Appointments</h2>
+        <h2 style={s.h2}>{sectionTitle}</h2>
         {bookings.length === 0 ? (
           <p style={{ color: colors.muted, textAlign: "center", padding: "20px 0" }}>No appointments booked yet.</p>
         ) : (
@@ -27,7 +31,7 @@ export default function Dashboard({ doctors, bookings, onReschedule, onCancel, g
                 <th style={s.th}>Doctor</th>
                 <th style={s.th}>Date</th>
                 <th style={s.th}>Time</th>
-                <th style={s.th}>Actions</th>
+                {isPatient && <th style={s.th}>Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -37,22 +41,14 @@ export default function Dashboard({ doctors, bookings, onReschedule, onCancel, g
                   <td style={s.td}>{getDoctorName(b.doctor_id)}</td>
                   <td style={s.td}>{b.date}</td>
                   <td style={s.td}>{b.slot}</td>
-                  <td style={s.td}>
-                    <div style={{ display: "flex", gap: "6px" }}>
-                      <button
-                        style={{ ...s.btn("accent"), padding: "5px 12px", fontSize: "0.8rem" }}
-                        onClick={() => onReschedule(b)}
-                      >
-                        Reschedule
-                      </button>
-                      <button
-                        style={{ ...s.btn("danger"), padding: "5px 12px", fontSize: "0.8rem" }}
-                        onClick={() => onCancel(b.id)}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </td>
+                  {isPatient && (
+                    <td style={s.td}>
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <button style={{ ...s.btn("accent"), padding: "5px 12px", fontSize: "0.8rem" }} onClick={() => onReschedule(b)}>Reschedule</button>
+                        <button style={{ ...s.btn("danger"), padding: "5px 12px", fontSize: "0.8rem" }} onClick={() => onCancel(b.id)}>Cancel</button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -63,10 +59,7 @@ export default function Dashboard({ doctors, bookings, onReschedule, onCancel, g
       <div style={s.card}>
         <h2 style={s.h2}>Doctors on Duty</h2>
         {doctors.map(doc => (
-          <div
-            key={doc.id}
-            style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: `1px solid ${colors.border}` }}
-          >
+          <div key={doc.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: `1px solid ${colors.border}` }}>
             <div>
               <strong>{doc.name}</strong>
               <div style={{ fontSize: "0.83rem", color: colors.muted }}>{doc.specialty}</div>

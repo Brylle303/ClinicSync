@@ -2,7 +2,7 @@ import { TODAY, colors } from "../constants";
 import { s } from "../styles";
 
 export default function BookAppointment({
-  doctors,
+  doctors, currentUser,
   selectedDoctor, setSelectedDoctor,
   selectedDate, setSelectedDate,
   selectedSlot, setSelectedSlot,
@@ -26,7 +26,7 @@ export default function BookAppointment({
             <strong>{doc.name}</strong>
             <span style={{ fontSize: "0.83rem", color: colors.muted, marginLeft: "10px" }}>{doc.specialty}</span>
             {isDateBlocked(doc.id, selectedDate) && (
-              <span style={{ fontSize: "0.78rem", color: colors.danger, marginLeft: "10px" }}>⚠ Blocked on selected date</span>
+              <span style={{ fontSize: "0.78rem", color: colors.danger, marginLeft: "10px" }}>⚠ Unavailable on selected date</span>
             )}
           </div>
         ))}
@@ -39,7 +39,7 @@ export default function BookAppointment({
             style={s.input}
             value={patientName}
             onChange={e => setPatientName(e.target.value)}
-            placeholder="Full name"
+            placeholder={currentUser?.username || "Full name"}
           />
         </div>
         <div>

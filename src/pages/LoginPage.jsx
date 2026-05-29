@@ -3,11 +3,11 @@ import { colors } from "../constants";
 import { s } from "../styles";
 
 export default function LoginPage({ onLogin, onRegister, loginError, registerError }) {
-  const [mode, setMode] = useState("login"); // "login" | "register"
+  const [mode, setMode] = useState("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState("patient"); // "patient" | "staff"
+  const [role, setRole] = useState("patient");
 
   function handleSubmit() {
     if (mode === "login") {
@@ -28,14 +28,12 @@ export default function LoginPage({ onLogin, onRegister, loginError, registerErr
     <div style={{ ...s.app, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ background: colors.card, border: `1px solid ${colors.border}`, borderRadius: "12px", padding: "40px", width: "360px", boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }}>
 
-        {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: "24px" }}>
           <div style={{ fontSize: "2rem", marginBottom: "4px" }}>🏥</div>
           <h1 style={{ margin: 0, fontSize: "1.6rem", color: colors.primary }}>ClinicSync</h1>
-          <p style={{ margin: "4px 0 0", color: colors.muted, fontSize: "0.88rem" }}>Clinic Booking System</p>
+          <p style={{ margin: "4px 0 0", color: colors.muted, fontSize: "0.88rem" }}>Clinic Booking System v1.0</p>
         </div>
 
-        {/* Tab toggle */}
         <div style={{ display: "flex", marginBottom: "24px", border: `1px solid ${colors.border}`, borderRadius: "8px", overflow: "hidden" }}>
           {["login", "register"].map(m => (
             <button
@@ -53,7 +51,6 @@ export default function LoginPage({ onLogin, onRegister, loginError, registerErr
           ))}
         </div>
 
-        {/* Fields */}
         <div style={{ marginBottom: "14px" }}>
           <label style={s.label}>Username</label>
           <input style={s.input} value={username} onChange={e => setUsername(e.target.value)} placeholder="Enter username" />
@@ -82,6 +79,7 @@ export default function LoginPage({ onLogin, onRegister, loginError, registerErr
               <select style={s.input} value={role} onChange={e => setRole(e.target.value)}>
                 <option value="patient">Patient</option>
                 <option value="staff">Staff</option>
+                <option value="doctor">Doctor</option>
               </select>
             </div>
           </>
@@ -98,7 +96,7 @@ export default function LoginPage({ onLogin, onRegister, loginError, registerErr
 
         {mode === "login" && (
           <p style={{ textAlign: "center", fontSize: "0.78rem", color: colors.muted, marginTop: "16px" }}>
-            Demo: <strong>staff/1234</strong> or <strong>patient/1234</strong>
+            Demo: <strong>staff/1234</strong>, <strong>patient/1234</strong>, or <strong>doctor/1234</strong>
           </p>
         )}
       </div>

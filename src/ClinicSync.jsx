@@ -25,6 +25,7 @@ export default function ClinicSync() {
   const [doctors, setDoctors] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [patients, setPatients] = useState([]);
+  const [dataLoading, setDataLoading] = useState(false);
 
   // Booking form
   const [selectedDoctor, setSelectedDoctor] = useState(null);
@@ -49,9 +50,10 @@ export default function ClinicSync() {
   // -------------------------------------------------------
   useEffect(() => {
     if (!currentUser) return;
-    fetchDoctors().then(doctorData => {
-      fetchBookings(currentUser);
-    });
+    setDataLoading(true);
+    fetchDoctors()
+      .then(() => fetchBookings(currentUser))
+      .finally(() => setDataLoading(false));
     if (currentUser.role === "staff") fetchPatients();
   }, [currentUser]);
 
@@ -69,7 +71,7 @@ export default function ClinicSync() {
   }
 
   async function fetchPatients() {
-    const { data } = await supabase.from("patients").select("*");
+    const { data } = await supabase.from("patients").select("*").order("name", { ascending: true });
     if (data) setPatients(data);
   }
 
@@ -82,9 +84,9 @@ export default function ClinicSync() {
     setLoading(false);
     if (error || !data) { setLoginError("Invalid credentials."); return; }
     setRole(data.role);
+    setCurrentUser(data);
     setLoginError("");
     navigate("/dashboard");
-    setCurrentUser(data);
   }
 
   async function handleRegister(username, password, confirmPassword, role) {
@@ -95,16 +97,16 @@ export default function ClinicSync() {
     const { data, error } = await supabase.from("users").insert({ username, password, role }).select().single();
     if (error) { setRegisterError("Registration failed."); return; }
     setRole(data.role);
+    setCurrentUser(data);
     setRegisterError("");
     navigate("/dashboard");
-    setCurrentUser(data);
   }
 
   function handleLogout() {
     setRole(null);
+    setCurrentUser(null);
     setDoctors([]); setBookings([]); setPatients([]);
     navigate("/");
-    setCurrentUser(null);
   }
 
   // -------------------------------------------------------
@@ -125,14 +127,31 @@ export default function ClinicSync() {
       .from("bookings")
       .insert({ doctor_id: selectedDoctor, date: selectedDate, slot: selectedSlot, patient: patientName, username: currentUser.username })
       .select().single();
-
     if (error) { setBookMsg("Booking failed."); return; }
     setBookings([...bookings, data]);
+    await ensurePatientRecord(patientName, currentUser.username);
     setBookMsg(`✓ Appointment booked for ${patientName}!`);
     setSelectedSlot(null); setPatientName("");
   }
 
+  // Fix: check by username first, then fall back to name match to avoid duplicates
+  async function ensurePatientRecord(name, username) {
+    const { data: byUsername } = await supabase.from("patients").select("id").eq("username", username).single();
+    if (byUsername) return; // already exists with this username
+
+    const { data: byName } = await supabase.from("patients").select("id, username").ilike("name", name).single();
+    if (byName && !byName.username) {
+      // existing staff-added record with no username — claim it
+      await supabase.from("patients").update({ username }).eq("id", byName.id);
+    } else if (!byName) {
+      // no record at all — create one
+      await supabase.from("patients").insert({ name, username, age: null, contact: null, notes: null });
+    }
+  }
+
   async function handleCancel(id) {
+    const confirmed = window.confirm("Are you sure you want to cancel this appointment?");
+    if (!confirmed) return;
     await supabase.from("bookings").delete().eq("id", id);
     setBookings(bookings.filter(b => b.id !== id));
   }
@@ -152,8 +171,6 @@ export default function ClinicSync() {
   }
 
   function getDoctorName(id) {
-    console.log("doctors array:", doctors);
-    console.log("looking for id:", id, typeof id);
     return doctors.find(d => d.id == id)?.name || "Unknown";
   }
 
@@ -171,6 +188,7 @@ export default function ClinicSync() {
     const updated = [...(doc.blocked_dates || []), blockDate].filter((v, i, a) => a.indexOf(v) === i);
     await supabase.from("doctors").update({ blocked_dates: updated }).eq("id", blockDoctor);
     setDoctors(doctors.map(d => d.id === blockDoctor ? { ...d, blocked_dates: updated } : d));
+    setBlockDate(TODAY); // reset after blocking
   }
 
   // -------------------------------------------------------
@@ -182,12 +200,22 @@ export default function ClinicSync() {
     setEditPatient(null);
   }
 
+  async function handleAddPatient(p) {
+    const { data, error } = await supabase
+      .from("patients")
+      .insert({ name: p.name, age: p.age || null, contact: p.contact || null, notes: p.notes || null, username: null })
+      .select().single();
+    if (error) { console.error("handleAddPatient:", error); return; }
+    setPatients(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
+  }
+
   // -------------------------------------------------------
   // Layout
   // -------------------------------------------------------
-  const navItems = role === "staff"
-    ? [["dashboard", "/dashboard", "Dashboard"], ["book", "/book", "Book Appointment"], ["records", "/records", "Patient Records"], ["schedule", "/schedule", "Doctor Schedules"]]
-    : [["dashboard", "/dashboard", "Dashboard"], ["book", "/book", "Book Appointment"]];
+  const navItems =
+    role === "staff"    ? [["dashboard", "/dashboard", "Dashboard"], ["records", "/records", "Patient Records"]]
+    : role === "doctor" ? [["dashboard", "/dashboard", "Dashboard"], ["schedule", "/schedule", "Doctor Schedules"]]
+    :                     [["dashboard", "/dashboard", "Dashboard"], ["book", "/book", "Book Appointment"]];
 
   if (!role) {
     return (
@@ -200,7 +228,7 @@ export default function ClinicSync() {
   return (
     <div style={s.app}>
       <header style={s.header}>
-        <span style={s.logo}>🏥 ClinicSync <span style={s.roleTag}>{role === "staff" ? "Staff" : "Patient"}</span></span>
+        <span style={s.logo}>🏥 ClinicSync <span style={s.roleTag}>{role.charAt(0).toUpperCase() + role.slice(1)}</span></span>
         <button style={s.logoutBtn} onClick={handleLogout}>Log Out</button>
       </header>
 
@@ -211,17 +239,25 @@ export default function ClinicSync() {
       </nav>
 
       <div style={s.main}>
-        <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-          <Route path="/dashboard" element={<Dashboard doctors={doctors} bookings={bookings} onReschedule={handleReschedule} onCancel={handleCancel} getDoctorName={getDoctorName} />} />
-          <Route path="/book" element={<BookAppointment doctors={doctors} selectedDoctor={selectedDoctor} setSelectedDoctor={setSelectedDoctor} selectedDate={selectedDate} setSelectedDate={setSelectedDate} selectedSlot={selectedSlot} setSelectedSlot={setSelectedSlot} patientName={patientName} setPatientName={setPatientName} bookMsg={bookMsg} setBookMsg={setBookMsg} isSlotBooked={isSlotBooked} isDateBlocked={isDateBlocked} onBook={handleBook} />} />
-          {role === "staff" && <>
-            <Route path="/records" element={<PatientRecords patients={patients} editPatient={editPatient} setEditPatient={setEditPatient} onSavePatient={handleSavePatient} />} />
-            <Route path="/schedule" element={<DoctorSchedules doctors={doctors} onUpdateSlots={handleUpdateSlots} blockDate={blockDate} setBlockDate={setBlockDate} blockDoctor={blockDoctor} setBlockDoctor={setBlockDoctor} onBlockDate={handleBlockDate} />} />
-          </>}
-          <Route path="/reschedule" element={rescheduleTarget ? <ReschedulePage rescheduleTarget={rescheduleTarget} rescheduleSlot={rescheduleSlot} setRescheduleSlot={setRescheduleSlot} isSlotBooked={isSlotBooked} onConfirm={confirmReschedule} onCancel={() => navigate("/dashboard")} doctors={doctors} /> : <Navigate to="/dashboard" />} />
-          <Route path="*" element={<Navigate to="/dashboard" />} />
-        </Routes>
+        {dataLoading ? (
+          <p style={{ textAlign: "center", color: "#6b7a8d", padding: "40px 0" }}>Loading...</p>
+        ) : (
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="/dashboard" element={<Dashboard role={role} doctors={doctors} bookings={bookings} onReschedule={handleReschedule} onCancel={handleCancel} getDoctorName={getDoctorName} />} />
+            {role === "patient" && <>
+              <Route path="/book" element={<BookAppointment doctors={doctors} currentUser={currentUser} selectedDoctor={selectedDoctor} setSelectedDoctor={setSelectedDoctor} selectedDate={selectedDate} setSelectedDate={setSelectedDate} selectedSlot={selectedSlot} setSelectedSlot={setSelectedSlot} patientName={patientName} setPatientName={setPatientName} bookMsg={bookMsg} setBookMsg={setBookMsg} isSlotBooked={isSlotBooked} isDateBlocked={isDateBlocked} onBook={handleBook} />} />
+              <Route path="/reschedule" element={rescheduleTarget ? <ReschedulePage rescheduleTarget={rescheduleTarget} rescheduleSlot={rescheduleSlot} setRescheduleSlot={setRescheduleSlot} isSlotBooked={isSlotBooked} onConfirm={confirmReschedule} onCancel={() => navigate("/dashboard")} doctors={doctors} /> : <Navigate to="/dashboard" />} />
+            </>}
+            {role === "staff" &&
+              <Route path="/records" element={<PatientRecords patients={patients} editPatient={editPatient} setEditPatient={setEditPatient} onSavePatient={handleSavePatient} onFetch={fetchPatients} onAddPatient={handleAddPatient} />} />
+            }
+            {role === "doctor" &&
+              <Route path="/schedule" element={<DoctorSchedules doctors={doctors} onUpdateSlots={handleUpdateSlots} blockDate={blockDate} setBlockDate={setBlockDate} blockDoctor={blockDoctor} setBlockDoctor={setBlockDoctor} onBlockDate={handleBlockDate} />} />
+            }
+            <Route path="*" element={<Navigate to="/dashboard" />} />
+          </Routes>
+        )}
       </div>
     </div>
   );
