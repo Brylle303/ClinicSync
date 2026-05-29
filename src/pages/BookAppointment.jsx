@@ -19,10 +19,10 @@ export default function BookAppointment({
   const [activeActionMenu, setActiveActionMenu] = useState(null);
 
   useEffect(() => {
-    if (role === "patient" && currentUser?.username) {
+    if (role === "patient" && currentUser?.username && !patientName) {
       setPatientName(currentUser.username);
     }
-  }, [role, currentUser, setPatientName]);
+  }, [role, currentUser, patientName, setPatientName]);
 
   const visibleDates = Array.from({ length: 14 }).map((_, i) => {
     const d = new Date();
@@ -312,8 +312,23 @@ export default function BookAppointment({
                     )}
                   </div>
 
+                  <div className="booking-for-section">
+                    <label>Booking For (Patient Name)</label>
+                    <input 
+                      type="text" 
+                      className="patient-name-input"
+                      value={patientName || ""}
+                      onChange={(e) => setPatientName(e.target.value)}
+                      placeholder="Enter patient name..."
+                    />
+                  </div>
+
                   <div className="booking-action-row">
-                    <button className="btn-book-now" disabled={!selectedSlot || isDateBlocked(doc.id, selectedDate)} onClick={onBook}>
+                    <button 
+                      className="btn-book-now" 
+                      disabled={!selectedSlot || !patientName || isDateBlocked(doc.id, selectedDate)} 
+                      onClick={onBook}
+                    >
                       Confirm & Book Appointment
                     </button>
                   </div>

@@ -1,0 +1,109 @@
+.reschedule-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .current-appt-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #d1dce8;
+    padding: 25px;
+    margin-bottom: 30px;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+  }
+  
+  .current-badge {
+    position: absolute;
+    top: -12px;
+    left: 25px;
+    background-color: #8ba091;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+  
+  .current-details {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  
+  .detail-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .detail-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #8ba091;
+    text-transform: uppercase;
+  }
+  
+  .detail-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #3e5942;
+  }
+  
+  .new-appt-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    padding: 30px;
+    border: 1px solid #d1dce8;
+    margin-bottom: 30px;
+  }
+  
+  .section-title {
+    color: #537055;
+    margin: 0 0 20px 0;
+    font-size: 1.3rem;
+    border-bottom: 2px solid #f4f7f5;
+    padding-bottom: 15px;
+  }
+  
+  .time-pill.current-slot {
+    background-color: #f4f7f5;
+    border-color: #8ba091;
+    color: #8ba091;
+    border-style: dashed;
+  }
+  
+  .reschedule-action-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  .cancel-btn {
+    background: none;
+    border: 1px solid #d1dce8;
+    color: #8ba091;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #f4f7f5;
+    color: #3e5942;
+  }
