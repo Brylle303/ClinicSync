@@ -125,6 +125,7 @@ export default function BookAppointment({
                     <span className="grid-day-name">{new Date(date).toLocaleDateString('en-US', { weekday: 'short' })}</span>
                     <span className="grid-day-num">{new Date(date).getDate()}</span>
                     
+                    {/* The Block Entire Day Button */}
                     <button 
                       className={`block-day-btn ${isBlockedDay ? 'blocked' : ''}`}
                       onClick={(e) => { e.stopPropagation(); onToggleBlockDay(staffDocId, date, isBlockedDay); }}
@@ -137,7 +138,8 @@ export default function BookAppointment({
             </div>
             
             <div className="grid-body">
-              {standardTimes.map(time => (
+              {/* FIX: Ensuring we map over displayTimes, not standardTimes! */}
+              {displayTimes.map(time => (
                 <div key={time} className="grid-row">
                   <div className="time-label">{time}</div>
                   {weekDates.map(date => {
@@ -153,7 +155,7 @@ export default function BookAppointment({
                         className={`grid-cell ${isRealBooking ? 'booked' : ''} ${(isBlockedDay || isSlotManuallyBlocked) && !isRealBooking ? 'blocked' : ''}`}
                         onClick={(e) => { 
                           e.stopPropagation();
-                          if (isBlockedDay) return;
+                          if (isBlockedDay) return; 
                           
                           if (isRealBooking) {
                              setActiveActionMenu(booking.id);
