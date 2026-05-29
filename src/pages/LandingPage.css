@@ -1,0 +1,142 @@
+.landing-container {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .landing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 8%;
+    background-color: #ffffff;
+  }
+  
+  .logo {
+    height: 40px;
+    width: auto;
+  }
+  
+  .btn-primary {
+    background-color: #4C6B50;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .btn-primary:hover {
+    background-color: #3b533e;
+  }
+  
+  .btn-secondary {
+    background-color: #C0CBB4; 
+    color: #2F4132;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: opacity 0.2s ease;
+  }
+  
+  .btn-secondary:hover {
+    opacity: 0.9;
+  }
+  
+  .hero-section {
+    background-color: #537055;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 40px 8% 0 8%;
+    overflow: hidden; 
+  }
+  
+  .hero-text-content {
+    flex: 1;
+    max-width: 600px;
+    padding-bottom: 60px;
+  }
+  
+  .hero-text-content h1 {
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  
+  .hero-text-content p {
+    font-size: 1.1rem;
+    line-height: 1.5;
+    margin-bottom: 30px;
+    opacity: 0.9;
+  }
+  
+  .hero-image-container {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+  }
+  
+  .hero-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  .how-it-works-section {
+    background-color: #ffffff;
+    padding: 80px 8%;
+    text-align: center;
+  }
+  
+  .section-title {
+    color: #4C6B50;
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+  
+  .section-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 60px;
+  }
+  
+  .features-grid {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 40px;
+  }
+  
+  .feature-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 250px;
+  }
+  
+  .feature-icon {
+    height: 100px;
+    width: auto;
+    margin-bottom: 20px;
+  }
+  
+  .feature-card h3 {
+    color: #4C6B50;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }

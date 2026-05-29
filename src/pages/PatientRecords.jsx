@@ -1,95 +1,99 @@
-import { useState, useEffect } from "react";
-import { colors } from "../constants";
-import { s } from "../styles";
+import { useState } from "react";
+import "./PatientRecords.css";
 
-export default function PatientRecords({ patients, editPatient, setEditPatient, onSavePatient, onFetch, onAddPatient }) {
-  useEffect(() => { onFetch(); }, []);
+export default function PatientRecords({ patients, editPatient, setEditPatient, onSavePatient }) {
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const [showForm, setShowForm] = useState(false);
-  const [newPatient, setNewPatient] = useState({ name: "", age: "", contact: "", notes: "" });
-  const [addMsg, setAddMsg] = useState("");
+  const filteredPatients = patients?.filter(p => 
+    p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.contact?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
 
-  function handleAdd() {
-    if (!newPatient.name) { setAddMsg("Name is required."); return; }
-    onAddPatient(newPatient);
-    setNewPatient({ name: "", age: "", contact: "", notes: "" });
-    setShowForm(false);
-    setAddMsg("");
-  }
+  const handleSave = (e) => {
+    e.preventDefault();
+    onSavePatient(editPatient);
+  };
 
   return (
-    <div style={s.card}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px", borderBottom: `1px solid ${colors.border}`, paddingBottom: "10px" }}>
-        <h2 style={{ ...s.h2, margin: 0, border: "none", padding: 0 }}>Patient Records</h2>
-        <button style={{ ...s.btn("success"), padding: "6px 14px", fontSize: "0.85rem" }} onClick={() => { setShowForm(!showForm); setAddMsg(""); }}>
-          {showForm ? "Cancel" : "+ Add Patient"}
-        </button>
+    <div className="records-wrapper">
+      <div className="dash-header">
+        <h1>Patient Records</h1>
+        <p>Manage patient details, contact info, and medical notes.</p>
       </div>
 
-      {showForm && (
-        <div style={{ background: colors.bg, border: `1px solid ${colors.border}`, borderRadius: "8px", padding: "16px", marginBottom: "18px" }}>
-          <h3 style={{ ...s.h3, marginBottom: "12px" }}>New Patient</h3>
-          <div style={{ ...s.grid2, marginBottom: "10px" }}>
-            <div>
-              <label style={s.label}>Name *</label>
-              <input style={s.input} value={newPatient.name} onChange={e => setNewPatient({ ...newPatient, name: e.target.value })} placeholder="Full name" />
-            </div>
-            <div>
-              <label style={s.label}>Age</label>
-              <input style={s.input} type="number" value={newPatient.age} onChange={e => setNewPatient({ ...newPatient, age: e.target.value })} placeholder="Age" />
-            </div>
-            <div>
-              <label style={s.label}>Contact</label>
-              <input style={s.input} value={newPatient.contact} onChange={e => setNewPatient({ ...newPatient, contact: e.target.value })} placeholder="Phone or email" />
-            </div>
-            <div>
-              <label style={s.label}>Notes</label>
-              <input style={s.input} value={newPatient.notes} onChange={e => setNewPatient({ ...newPatient, notes: e.target.value })} placeholder="e.g. Hypertension" />
-            </div>
+      <div className="search-bar-container">
+        <input 
+          type="text" 
+          placeholder="Search by patient name or phone number..." 
+          className="records-search-input"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
+      <div className="table-card">
+        <table className="records-table">
+          <thead>
+            <tr>
+              <th>Patient Name</th>
+              <th>Age</th>
+              <th>Contact Number</th>
+              <th>Medical Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredPatients.length === 0 ? (
+              <tr><td colSpan="5" className="empty-state">No patients found.</td></tr>
+            ) : (
+              filteredPatients.map(p => (
+                <tr key={p.id}>
+                  <td className="fw-bold">{p.name}</td>
+                  <td>{p.age || "—"}</td>
+                  <td>{p.contact || "—"}</td>
+                  <td className="notes-cell">{p.notes || "No notes added."}</td>
+                  <td>
+                    <button className="edit-btn" onClick={() => setEditPatient(p)}>Edit</button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {editPatient && (
+        <div className="modal-overlay" onClick={() => setEditPatient(null)}>
+          <div className="modal-card" onClick={e => e.stopPropagation()}>
+            <h2>Edit Record</h2>
+            <form onSubmit={handleSave} className="edit-form">
+              <div className="input-group">
+                <label>Patient Name</label>
+                <input type="text" value={editPatient.name || ""} onChange={e => setEditPatient({...editPatient, name: e.target.value})} required />
+              </div>
+              <div className="input-row">
+                <div className="input-group">
+                  <label>Age</label>
+                  <input type="number" value={editPatient.age || ""} onChange={e => setEditPatient({...editPatient, age: e.target.value})} />
+                </div>
+                <div className="input-group">
+                  <label>Contact Number</label>
+                  <input type="text" value={editPatient.contact || ""} onChange={e => setEditPatient({...editPatient, contact: e.target.value})} />
+                </div>
+              </div>
+              <div className="input-group">
+                <label>Medical Notes</label>
+                <textarea rows="4" value={editPatient.notes || ""} onChange={e => setEditPatient({...editPatient, notes: e.target.value})}></textarea>
+              </div>
+              
+              <div className="modal-actions">
+                <button type="button" className="cancel-btn" onClick={() => setEditPatient(null)}>Cancel</button>
+                <button type="submit" className="save-btn">Save Changes</button>
+              </div>
+            </form>
           </div>
-          {addMsg && <div style={s.msg("error")}>{addMsg}</div>}
-          <button style={{ ...s.btn("primary"), marginTop: "10px" }} onClick={handleAdd}>Save Patient</button>
         </div>
       )}
-
-      <table style={s.table}>
-        <thead>
-          <tr>
-            <th style={s.th}>Name</th>
-            <th style={s.th}>Age</th>
-            <th style={s.th}>Contact</th>
-            <th style={s.th}>Notes</th>
-            <th style={s.th}>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {patients.map(p => (
-            <tr key={p.id}>
-              {editPatient?.id === p.id ? (
-                <>
-                  <td style={s.td}><input style={{ ...s.input, padding: "5px 8px" }} value={editPatient.name} onChange={e => setEditPatient({ ...editPatient, name: e.target.value })} /></td>
-                  <td style={s.td}><input style={{ ...s.input, padding: "5px 8px", width: "60px" }} value={editPatient.age ?? ""} onChange={e => setEditPatient({ ...editPatient, age: e.target.value })} /></td>
-                  <td style={s.td}><input style={{ ...s.input, padding: "5px 8px" }} value={editPatient.contact ?? ""} onChange={e => setEditPatient({ ...editPatient, contact: e.target.value })} /></td>
-                  <td style={s.td}><input style={{ ...s.input, padding: "5px 8px" }} value={editPatient.notes ?? ""} onChange={e => setEditPatient({ ...editPatient, notes: e.target.value })} /></td>
-                  <td style={s.td}>
-                    <button style={{ ...s.btn("success"), padding: "5px 12px", fontSize: "0.8rem" }} onClick={() => onSavePatient(editPatient)}>Save</button>
-                  </td>
-                </>
-              ) : (
-                <>
-                  <td style={s.td}>{p.name}</td>
-                  <td style={s.td}>{p.age ?? "—"}</td>
-                  <td style={s.td}>{p.contact ?? "—"}</td>
-                  <td style={s.td}>{p.notes ?? "—"}</td>
-                  <td style={s.td}>
-                    <button style={{ ...s.btn("primary"), padding: "5px 12px", fontSize: "0.8rem" }} onClick={() => setEditPatient({ ...p })}>Edit</button>
-                  </td>
-                </>
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 }
